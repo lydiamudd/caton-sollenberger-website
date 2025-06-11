@@ -238,3 +238,42 @@ nav ul li a:hover {
     }
 }
 
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: left;
+    color: #000;
+    background-color: #f8f0fb;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.calendar-grid > div {
+    background: #fff;
+    border: 1px solid #ccc;
+    min-height: 100px;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.calendar-grid > div strong {
+    display: block;
+    color: #8075FF;
+    margin-bottom: 5px;
+}
+
+.calendar-grid .event {
+    font-size: 12px;
+    padding: 3px 0;
+    border-top: 1px dotted #ccc;
+    margin-top: 5px;
+}
+
+.calendar-grid .empty {
+    background: transparent;
+    border: none;
+}
