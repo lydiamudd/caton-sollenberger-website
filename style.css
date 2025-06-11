@@ -277,3 +277,13 @@ nav ul li a:hover {
     background: transparent;
     border: none;
 }
+
+.weekday {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 0.25rem;
+    border: none;
+  }
+  
