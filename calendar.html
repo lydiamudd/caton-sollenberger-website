@@ -2,245 +2,148 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shows Calendar</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Calendar with ICS Import</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #211a1d;
+      color: #f8f0fb;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #E9DF00;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: left;
+      color: #000;
+      background-color: #f8f0fb;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .calendar-grid > div {
+      background: #fff;
+      border: 1px solid #ccc;
+      min-height: 100px;
+      padding: 5px;
+      border-radius: 5px;
+      font-size: 14px;
+      position: relative;
+    }
+
+    .calendar-grid .weekday {
+      background-color: #211a1d;
+      font-weight: bold;
+      color: #E9DF00;
+      text-align: center;
+    }
+
+    .event {
+      font-size: 12px;
+      margin-top: 5px;
+      padding: 3px;
+      border-top: 1px dotted #ccc;
+    }
+
+    strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #8075FF;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Calendar</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="music.html">Music</a></li>
-        <li><a href="calendar.html">Calendar</a></li>
-      </ul>
-    </nav>
-  </header>
+  <h1>My Calendar</h1>
+  <div class="calendar-grid" id="calendar"></div>
 
-  <main>
-    <section class="events">
-      <!-- <h2>Shows Calendar</h2> -->
-      <div id="calendar-controls" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-        <button id="prev-month" class="calendar-button">←</button>
-        <div id="calendar-header" style="font-size: 1.5rem; font-weight: bold;"></div>
-        <button id="next-month" class="calendar-button">→</button>
-    </div>
-            <div id="calendar-grid" class="calendar-grid">
-        <!-- Weekday headers -->
-        <div class="weekday">Sun</div>
-        <div class="weekday">Mon</div>
-        <div class="weekday">Tue</div>
-        <div class="weekday">Wed</div>
-        <div class="weekday">Thu</div>
-        <div class="weekday">Fri</div>
-        <div class="weekday">Sat</div>        
-      </div>
-    </section>
-  </main>
+  <!-- Include ical.js from CDN -->
+  <script src="https://unpkg.com/ical.js/build/ical.min.js"></script>
 
   <script>
-    const icsUrl = 'https://p118-caldav.icloud.com/published/2/NTI0OTUwOTM3NTI0OTUwORo0a-wmI95-JRdLXFzjojgHpn5GFmjqXPMGkucAEnJB';
-  
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-  
-    let currentMonth = new Date().getMonth();
-    let currentYear = new Date().getFullYear();
-  
-    async function fetchICS(url) {
-      const response = await fetch(url);
-      const text = await response.text();
-      return parseICS(text);
-    }
-  
-    function parseICS(data) {
-      const events = [];
-      const regex = /BEGIN:VEVENT([\s\S]*?)END:VEVENT/g;
-      let match;
-      while ((match = regex.exec(data)) !== null) {
-        const eventBlock = match[1];
-        const summary = eventBlock.match(/SUMMARY:(.*)/)?.[1]?.trim();
-        const location = eventBlock.match(/LOCATION:(.*)/)?.[1]?.trim();
-        const dtstart = eventBlock.match(/DTSTART(?:;[^:]+)?:([^\n\r]+)/)?.[1]?.trim();
-  
-        if (summary && dtstart) {
-          const date = formatICSToDate(dtstart);
-          events.push({ date, title: summary, location: location || '' });
-        }
-      }
-      return events;
-    }
-  
-    function formatICSToDate(icsDateStr) {
-      // Handle formats like "20250614" or "20250614T193000Z"
-      const year = icsDateStr.substring(0, 4);
-      const month = icsDateStr.substring(4, 6) - 1; // zero-based
-      const day = icsDateStr.substring(6, 8);
-      return new Date(year, month, day);
-    }
-  
-    async function generateCalendar(month = currentMonth, year = currentYear) {
-      const calendarHeader = document.getElementById('calendar-header');
-      const calendarGrid = document.getElementById('calendar-grid');
-  
-      calendarHeader.textContent = `${monthNames[month]} ${year}`;
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
-      // Clear previous cells (except weekday headers)
-      calendarGrid.querySelectorAll('.calendar-cell, .empty').forEach(el => el.remove());
-  
-      // Add blank cells before the first day
-      for (let i = 0; i < firstDay; i++) {
-        const cell = document.createElement('div');
-        cell.classList.add('empty');
-        calendarGrid.appendChild(cell);
-    }
+    const calendarContainer = document.getElementById('calendar');
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-      const events = await fetchICS(icsUrl);
-      const eventsByDate = {};
-      events.forEach(event => {
-        const key = event.date.toISOString().split('T')[0];
-        if (!eventsByDate[key]) eventsByDate[key] = [];
-        eventsByDate[key].push(event);
-      });
-  
+    const ICS_URL = 'https://p118-caldav.icloud.com/published/2/NTI0OTUwOTM3NTI0OTUwORo0a-wmI95-JRdLXFzjojgHpn5GFmjqXPMGkucAEnJB'; // Replace this with your real .ics URL
+
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    // Render weekday headers
+    weekdays.forEach(day => {
+      const cell = document.createElement('div');
+      cell.textContent = day;
+      cell.className = 'weekday';
+      calendarContainer.appendChild(cell);
+    });
+
+    function renderMonth(year, month, events) {
+      // First day of the month
+      const firstDay = new Date(year, month, 1);
+      const startDay = firstDay.getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      // Add empty cells before first day
+      for (let i = 0; i < startDay; i++) {
+        const empty = document.createElement('div');
+        calendarContainer.appendChild(empty);
+      }
+
       for (let day = 1; day <= daysInMonth; day++) {
+        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const cell = document.createElement('div');
-        cell.classList.add('calendar-cell');
-        const date = new Date(year, month, day);
-        const key = date.toISOString().split('T')[0];
-  
         cell.innerHTML = `<strong>${day}</strong>`;
-        if (eventsByDate[key]) {
-          eventsByDate[key].forEach(event => {
-            const eventDiv = document.createElement('div');
-            eventDiv.classList.add('event');
-            eventDiv.innerHTML = `<span>${event.title}</span><br><em>${event.location}</em>`;
-            cell.appendChild(eventDiv);
+
+        if (events[dateKey]) {
+          events[dateKey].forEach(evt => {
+            const evtDiv = document.createElement('div');
+            evtDiv.className = 'event';
+            evtDiv.textContent = evt;
+            cell.appendChild(evtDiv);
           });
         }
-  
-        calendarGrid.appendChild(cell);
+
+        calendarContainer.appendChild(cell);
       }
     }
-  
-    // Navigation buttons
-    document.getElementById('prev-month').addEventListener('click', () => {
-      currentMonth--;
-      if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
+
+    // Parse ICS and extract events
+    async function loadICS() {
+      try {
+        const response = await fetch(ICS_URL);
+        const icsText = await response.text();
+        const jcalData = ICAL.parse(icsText);
+        const comp = new ICAL.Component(jcalData);
+        const vevents = comp.getAllSubcomponents('vevent');
+
+        const events = {};
+
+        vevents.forEach(vevent => {
+          const evt = new ICAL.Event(vevent);
+          const startDate = evt.startDate.toJSDate();
+          const dateKey = `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}-${String(startDate.getDate()).padStart(2, '0')}`;
+
+          if (!events[dateKey]) events[dateKey] = [];
+          events[dateKey].push(evt.summary);
+        });
+
+        renderMonth(currentYear, currentMonth, events);
+
+      } catch (err) {
+        console.error('Failed to load ICS:', err);
+        calendarContainer.innerHTML = '<p style="color:red;">Failed to load calendar events.</p>';
       }
-      generateCalendar(currentMonth, currentYear);
-    });
-  
-    document.getElementById('next-month').addEventListener('click', () => {
-      currentMonth++;
-      if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-      }
-      generateCalendar(currentMonth, currentYear);
-    });
-  
-    // Initial render
-    generateCalendar();
+    }
+
+    loadICS();
   </script>
-  
-
-
-  <!-- <script>
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSNK85vBRrlhWYpPQF04sDO-1G7n_3IKzOWuOidRwWNeR4eMQrRTclZBRxRctRT4yFXVdbkFYf3oH9_/pub?output=csv';
-  
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
-  
-    let currentMonth = new Date().getMonth();
-    let currentYear = new Date().getFullYear();
-  
-    async function generateCalendar(month = currentMonth, year = currentYear) {
-      const calendarHeader = document.getElementById('calendar-header');
-      const calendarGrid = document.getElementById('calendar-grid');
-  
-      calendarHeader.textContent = `${monthNames[month]} ${year}`;
-  
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
-      // Clear previous cells (except weekday headers)
-      calendarGrid.querySelectorAll('.calendar-cell, .empty').forEach(el => el.remove());
-  
-      // Add blank cells before the first day
-      for (let i = 0; i < 7 + firstDay; i++) {
-        if (i < 7) continue; // Skip weekday headers
-        const cell = document.createElement('div');
-        if (i < 7 + firstDay) cell.classList.add('empty');
-        calendarGrid.appendChild(cell);
-      }
-  
-      // Fetch CSV data
-      const response = await fetch(csvUrl);
-      const text = await response.text();
-      const rows = text.trim().split('\n').slice(1);
-      const eventsByDate = {};
-  
-      rows.forEach(row => {
-        const [dateStr, title, location] = row.split(',');
-        const eventDate = new Date(dateStr);
-        const key = eventDate.toISOString().split('T')[0];
-        if (!eventsByDate[key]) eventsByDate[key] = [];
-        eventsByDate[key].push({ title, location });
-      });
-  
-      for (let day = 1; day <= daysInMonth; day++) {
-        const cell = document.createElement('div');
-        cell.classList.add('calendar-cell');
-  
-        const date = new Date(year, month, day);
-        const key = date.toISOString().split('T')[0];
-  
-        cell.innerHTML = `<strong>${day}</strong>`;
-        if (eventsByDate[key]) {
-          eventsByDate[key].forEach(event => {
-            const eventDiv = document.createElement('div');
-            eventDiv.classList.add('event');
-            eventDiv.innerHTML = `<span>${event.title}</span><br><em>${event.location}</em>`;
-            cell.appendChild(eventDiv);
-          });
-        }
-  
-        calendarGrid.appendChild(cell);
-      }
-    }
-  
-    // Event listeners for navigation buttons
-    document.getElementById('prev-month').addEventListener('click', () => {
-      currentMonth--;
-      if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
-      }
-      generateCalendar(currentMonth, currentYear);
-    });
-  
-    document.getElementById('next-month').addEventListener('click', () => {
-      currentMonth++;
-      if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-      }
-      generateCalendar(currentMonth, currentYear);
-    });
-  
-    // Initial render
-    generateCalendar();
-  </script> -->
-  
 </body>
 </html>
