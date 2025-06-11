@@ -290,3 +290,21 @@ nav ul li a:hover {
     color: #E9DF00;
   }
   
+  .calendar-button {
+    background-color: #6320EE;   /* background color */
+    color: white;                /* text color */
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .calendar-button:hover {
+    background-color: #E9DF00; /* darker on hover */
+    color: #6320EE;
+  }
+  
+
+  
