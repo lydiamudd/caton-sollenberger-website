@@ -91,7 +91,7 @@ nav ul li a:hover {
 
 
 /* Event Section */
-.events {
+.event-list {
     max-width: 900px;
     margin: 0px auto;
     background-color: #211a1d;
@@ -100,7 +100,7 @@ nav ul li a:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.events h2 {
+.event-list h2 {
     text-align: center;
     color: #333;
     font-size: 2rem;
@@ -108,7 +108,7 @@ nav ul li a:hover {
 }
 
 /* Add a border, padding, and some margin to each event to create a box */
-.event {
+.event-list {
     background-color: #f8f0fb;
     padding: 20px;
     margin-bottom: 20px;
@@ -118,7 +118,7 @@ nav ul li a:hover {
 }
 
 /* Event titles, dates, and locations */
-.event h3 {
+.event-list h3 {
     font-size: 1.5rem;
     color: #333;
     margin-bottom: 10px;
@@ -141,11 +141,11 @@ nav ul li a:hover {
 
 /* Responsive Design */
 @media (max-width: 600px) {
-    .events {
+    .event-list {
         padding: 10px;
     }
 
-    .event h3 {
+    .event-list h3 {
         font-size: 1.3rem;
     }
 
@@ -157,7 +157,7 @@ nav ul li a:hover {
 
 
 /* Make the anchor tag fill the entire .event box */
-.event a {
+.event-list a {
     display: block;  /* Make the anchor take up the full space of the .event box */
     text-decoration: none;  /* Remove underline */
     color: inherit;  /* Inherit color from the parent */
@@ -165,7 +165,7 @@ nav ul li a:hover {
     width: 100%;  /* Make the anchor take up the full width of the .event box */
 }
 
-.event a:hover {
+.event-list a:hover {
     background-color: #f0f0f0;  /* Light background change on hover */
 }
 
