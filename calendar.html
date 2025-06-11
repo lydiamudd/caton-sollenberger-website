@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shows Calendar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Calendar</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <!-- <li><a href="shows.html">Shows</a></li> -->
+        <li><a href="music.html">Music</a></li>
+        <!-- <li><a href="about.html">About</a></li> -->
+        <li><a href="calendar.html">Shows</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="events">
+      <h2>Upcoming Events</h2>
+
+      <!-- Embed Google Sheet as CSV-driven calendar here -->
+      <div id="calendar-container">
+        <p>Loading calendar...</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vSNK85vBRrlhWYpPQF04sDO-1G7n_3IKzOWuOidRwWNeR4eMQrRTclZBRxRctRT4yFXVdbkFYf3oH9_/pub?output=csv')
+      .then(response => response.text())
+      .then(data => {
+        const rows = data.trim().split('\n').slice(1); // skip headers
+        const calendar = document.getElementById('calendar-container');
+        calendar.innerHTML = '';
+
+        rows.forEach(row => {
+          const [date, title, location] = row.split(',');
+
+          const eventDiv = document.createElement('div');
+          eventDiv.className = 'event';
+
+          eventDiv.innerHTML = `
+            <h3>${title}</h3>
+            <p class="event-date">${date}</p>
+            <p class="event-location">${location}</p>
+          `;
+
+          calendar.appendChild(eventDiv);
+        });
+      });
+  </script>
+</body>
+</html>
