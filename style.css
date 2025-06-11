@@ -291,6 +291,12 @@ nav ul li a:hover {
   }
   
   .calendar-button {
+    font-size: 1.5rem; /* bigger arrows */
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: #6320EE;   /* background color */
     color: white;                /* text color */
     border: none;
