@@ -279,7 +279,7 @@ nav ul li a:hover {
 }
 
 .weekday {
-    background-color: #f0f0f0;
+    background-color: #211a1d;
     font-weight: bold;
     font-size: 0.9rem;
     text-align: center;
@@ -287,5 +287,6 @@ nav ul li a:hover {
     border: none;
     border-bottom: 1px solid #ccc;
     height: auto;
+    color: #E9DF00;
   }
   
