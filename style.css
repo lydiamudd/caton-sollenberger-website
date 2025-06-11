@@ -251,7 +251,7 @@ nav ul li a:hover {
     border-radius: 10px;
 }
 
-.calendar-grid > div {
+.calendar-grid > div:not(.weekday) {
     background: #fff;
     border: 1px solid #ccc;
     min-height: 100px;
