@@ -238,7 +238,7 @@ nav ul li a:hover {
     }
 }
 
-.calendar-grid {
+/* .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 10px;
@@ -276,7 +276,7 @@ nav ul li a:hover {
 .calendar-grid .empty {
     background: transparent;
     border: none;
-}
+} */
 
 .weekday {
     background-color: #211a1d;
