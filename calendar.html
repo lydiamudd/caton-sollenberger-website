@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Shows Calendar</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/ical@1.4.0/ical.min.js"></script>
 </head>
 <body>
   <header>
@@ -95,13 +94,12 @@
       calendarGrid.querySelectorAll('.calendar-cell, .empty').forEach(el => el.remove());
   
       // Add blank cells before the first day
-      for (let i = 0; i < 7 + firstDay; i++) {
-        if (i < 7) continue;
+      for (let i = 0; i < firstDay; i++) {
         const cell = document.createElement('div');
         cell.classList.add('empty');
         calendarGrid.appendChild(cell);
-      }
-  
+    }
+
       const events = await fetchICS(icsUrl);
       const eventsByDate = {};
       events.forEach(event => {
