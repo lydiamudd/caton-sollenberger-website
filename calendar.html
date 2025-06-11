@@ -21,6 +21,7 @@
   <main>
     <section class="events">
       <h2>Shows Calendar</h2>
+      <div id="calendar-header" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 0.5rem;"></div>
       <div id="calendar-grid" class="calendar-grid">
         <!-- Weekday headers -->
         <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
@@ -35,11 +36,21 @@
       const today = new Date();
       const year = today.getFullYear();
       const month = today.getMonth();
+      const monthNames = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const calendarHeader = document.getElementById('calendar-header');
+    calendarHeader.textContent = `${monthNames[month]} ${year}`;
+
 
       const firstDay = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
       const calendarGrid = document.getElementById('calendar-grid');
+
+       // Clear previous cells (except weekday headers)
+    calendarGrid.querySelectorAll('.calendar-cell, .empty').forEach(el => el.remove());
 
       // Add blank cells for first row padding
       for (let i = 0; i < 7 + firstDay; i++) {
@@ -86,6 +97,7 @@
       }
     }
 
+    
     generateCalendar();
   </script>
 </body>
