@@ -1,0 +1,240 @@
+body {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    background-color: #211a1d;
+    color: #f8f0fb;
+    text-align: center;
+    margin: 0;
+    padding-top: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    color: #8075ff;
+    font-size: 40px;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+img {
+    display: block;
+    margin: 0 auto;
+    width: 250px;
+    height: auto;
+    border: 10px solid #8075ff;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Remove border from social media icons */
+.social-links a img {
+    width: 40px; /* Adjust size of icons */
+    height: auto;
+    transition: transform 0.3s ease-in-out;
+    border: none; /* Explicitly removing border from the icons */
+}
+
+/* Hover effect for the social media icons */
+.social-links a img:hover {
+    transform: scale(1.2); /* Slight enlargement on hover */
+}
+
+.social-links {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.icon-credit {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.icon-credit a {
+    color: #8075ff;
+    text-decoration: none;
+}
+
+.icon-credit a:hover {
+    text-decoration: underline;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 10px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: #858282;
+}
+
+nav ul li a:hover {
+    color: #007BFF;
+}
+
+
+
+/* Event Section */
+.events {
+    max-width: 900px;
+    margin: 0px auto;
+    background-color: #211a1d;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.events h2 {
+    text-align: center;
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 30px;
+}
+
+/* Add a border, padding, and some margin to each event to create a box */
+.event {
+    background-color: #f8f0fb;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 3px solid #E9DF00;  /* Border color */
+    border-radius: 8px;  /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Event titles, dates, and locations */
+.event h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.event-date,
+.event-location {
+    font-size: 1rem;
+    color: #666;
+}
+
+.event-date {
+    font-weight: bold;
+    color: #8075FF;
+}
+
+.event-location {
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .events {
+        padding: 10px;
+    }
+
+    .event h3 {
+        font-size: 1.3rem;
+    }
+
+    .event-date,
+    .event-location {
+        font-size: 0.9rem;
+    }
+}
+
+
+/* Make the anchor tag fill the entire .event box */
+.event a {
+    display: block;  /* Make the anchor take up the full space of the .event box */
+    text-decoration: none;  /* Remove underline */
+    color: inherit;  /* Inherit color from the parent */
+    height: 100%;  /* Make the anchor take up the full height of the .event box */
+    width: 100%;  /* Make the anchor take up the full width of the .event box */
+}
+
+.event a:hover {
+    background-color: #f0f0f0;  /* Light background change on hover */
+}
+
+
+/* Table featuring studio albums */
+.music-table {
+    width: 100%;
+    max-width: fit-content;
+    border-collapse: collapse;
+    margin-top: 0px;
+    border: 2px solid #444; /* Unique border style */
+}
+
+.music-table th, .music-table td {
+    border: 2px solid #666; /* Thicker, darker borders for a distinct look */
+    padding: 12px;
+    text-align: left;
+}
+
+.music-table th {
+    background-color: #222;
+    color: white;
+    text-transform: uppercase;
+}
+
+.music-table td:first-child {
+    width: 70%; /* Largest column for album names */
+}
+
+.music-table td:nth-child(2), .music-table td:nth-child(3) {
+    width: 15%; /* Smaller columns for Apple Music and Spotify */
+    text-align: center;
+}
+
+.music-table img {
+    width: 50px; /* Set the size of the icons */
+    height: 50px; /* Set the height of the icons */
+    border: none; /* Remove the border */
+    object-fit: contain;
+}
+
+.album-info {
+    line-height: 1.5; /* Adds space between the lines */
+}
+
+.album-title {
+    font-weight: bold; /* Makes the album title bold */
+}
+
+.artist-name {
+    font-style: italic; /* Makes the artist name italic */
+}
+
+/* Adjustments for the Studio Albums table on mobile */
+@media (max-width: 600px) {
+    .music-table {
+        width: 100%; /* Make the table take up more space */
+        max-width: fit-content; /* Prevent it from getting too wide */
+    }
+    .music-table td:first-child {
+        width: 70%; /* Larger column for album names */
+    }
+    .music-table td:nth-child(2), .music-table td:nth-child(3) {
+        width: 15%; /* Smaller columns for Apple Music and Spotify */
+    }
+    .music-table img {
+        width: 35px; /* Reduce the size of the icons */
+        height: 35px;
+        margin: 5px auto; /* Center them if necessary */
+    }
+}
+
