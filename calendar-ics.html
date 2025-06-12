@@ -7,21 +7,54 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     .popup {
-      position: absolute;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       background-color: #211a1d;
       border: 1px solid #ccc;
       border-radius: 0.5rem;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
       padding: 1rem;
-      z-index: 1000;
-      max-width: 250px;
+      z-index: 1001;
+      max-width: 90%;
+      width: 300px;
       font-size: 0.9rem;
+      color: white;
     }
+  
     .popup h3 {
       margin-top: 0;
       font-size: 1rem;
     }
+  
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+    }
+  
+    .popup-close {
+      position: absolute;
+      top: 0.25rem;
+      right: 0.5rem;
+      cursor: pointer;
+      font-size: 1.25rem;
+      color: white;
+    }
+  
+    @media (max-width: 600px) {
+      .popup {
+        width: 90%;
+        font-size: 1rem;
+      }
+    }
   </style>
+  
 </head>
 <body>
   <header>
@@ -143,7 +176,7 @@
             eventDiv.style.cursor = "pointer";
             eventDiv.addEventListener("click", (e) => {
               e.stopPropagation();
-              showEventPopup(event, e);
+              showEventPopup(event);
             });
             cell.appendChild(eventDiv);
           });
@@ -153,25 +186,42 @@
       }
     }
 
-    function showEventPopup(event, clickEvent) {
-      removePopup();
+    function showEventPopup(event) {
+    // Remove any existing popup and overlay
+    document.querySelectorAll(".popup, .popup-overlay").forEach(el => el.remove());
 
-      const popup = document.createElement("div");
-      popup.className = "popup";
-      popup.innerHTML = `
+    const overlay = document.createElement("div");
+    overlay.className = "popup-overlay";
+    overlay.addEventListener("click", () => {
+        overlay.remove();
+        popup.remove();
+    });
+
+    const popup = document.createElement("div");
+    popup.className = "popup";
+
+    const closeBtn = document.createElement("span");
+    closeBtn.className = "popup-close";
+    closeBtn.innerHTML = "&times;";
+    closeBtn.addEventListener("click", () => {
+        popup.remove();
+        overlay.remove();
+    });
+
+    popup.appendChild(closeBtn);
+
+    popup.innerHTML += `
         <h3>${event.summary}</h3>
         <p><strong>Time:</strong> ${event.startTime}</p>
         ${event.location ? `<p><strong>Location:</strong> ${event.location}</p>` : ""}
         ${event.description ? `<p><strong>Notes:</strong><br>${event.description}</p>` : ""}
         ${event.url ? `<p><a href="${event.url}" target="_blank">More info</a></p>` : ""}
-      `;
+    `;
 
-      document.body.appendChild(popup);
-
-      const rect = clickEvent.target.getBoundingClientRect();
-      popup.style.left = `${rect.right + 10 + window.scrollX}px`;
-      popup.style.top = `${rect.top + window.scrollY}px`;
+    document.body.appendChild(overlay);
+    document.body.appendChild(popup);
     }
+
 
     function removePopup() {
       document.querySelectorAll(".popup").forEach(p => p.remove());
