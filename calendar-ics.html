@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ICS Calendar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Calendar</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="music.html">Music</a></li>
+        <li><a href="calendar.html">Calendar</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="events">
+      <div id="calendar-controls" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+        <button id="prev-month" class="calendar-button">←</button>
+        <div id="calendar-header" style="font-size: 1.5rem; font-weight: bold;"></div>
+        <button id="next-month" class="calendar-button">→</button>
+      </div>
+
+      <div id="calendar-grid" class="calendar-grid">
+        <!-- Weekday headers (these stay in place) -->
+        <div class="weekday">Sun</div>
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>        
+      </div>
+    </section>
+  </main>
+
+  <!-- Load ical.js from jsDelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
+
+  <script>
+    const ICS_URL = 'https://corsproxy.io/?https://p118-caldav.icloud.com/published/2/NTI0OTUwOTM3NTI0OTUwORo0a-wmI95-JRdLXFzjojgHpn5GFmjqXPMGkucAEnJB';
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+  
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    let allEvents = {};
+  
+    async function fetchICSEvents() {
+      try {
+        const response = await fetch(ICS_URL);
+        const text = await response.text();
+        const jcalData = ICAL.parse(text);
+        const comp = new ICAL.Component(jcalData);
+        const vevents = comp.getAllSubcomponents('vevent');
+  
+        const events = {};
+  
+        vevents.forEach(vevent => {
+          const evt = new ICAL.Event(vevent);
+          const startDate = evt.startDate.toJSDate();
+          const key = startDate.toISOString().split('T')[0];
+  
+          const timeOptions = { hour: 'numeric', minute: '2-digit' };
+          const startTime = startDate.toLocaleTimeString([], timeOptions);
+  
+          let location = evt.location || "";
+          location = location.replace(", United States", "").trim();
+  
+          if (!events[key]) events[key] = [];
+          events[key].push({ 
+            summary: evt.summary, 
+            location, 
+            startTime 
+          });
+        });
+  
+        allEvents = events;
+        generateCalendar(currentMonth, currentYear);
+      } catch (err) {
+        console.error('Failed to load ICS:', err);
+        document.getElementById('calendar-grid').innerHTML += '<p style="color:red;">Failed to load calendar events.</p>';
+      }
+    }
+  
+    function generateCalendar(month, year) {
+      const calendarHeader = document.getElementById('calendar-header');
+      const calendarGrid = document.getElementById('calendar-grid');
+  
+      calendarHeader.textContent = `${monthNames[month]} ${year}`;
+  
+      // Remove previous calendar cells (preserve weekday headers)
+      calendarGrid.querySelectorAll('.calendar-cell, .empty').forEach(el => el.remove());
+  
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+      // Add empty cells before the first day
+      for (let i = 0; i < firstDay; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('empty');
+        calendarGrid.appendChild(cell);
+      }
+  
+      for (let day = 1; day <= daysInMonth; day++) {
+        const cell = document.createElement('div');
+        cell.classList.add('calendar-cell');
+  
+        const date = new Date(year, month, day);
+        const key = date.toISOString().split('T')[0];
+  
+        cell.innerHTML = `<strong>${day}</strong>`;
+  
+        if (allEvents[key]) {
+          allEvents[key].forEach(event => {
+            const eventDiv = document.createElement('div');
+            eventDiv.classList.add('event');
+            eventDiv.innerHTML = `<span>${event.startTime} – ${event.summary}</span>${event.location ? `<br><em>${event.location}</em>` : ""}`;
+            cell.appendChild(eventDiv);
+          });
+        }
+  
+        calendarGrid.appendChild(cell);
+      }
+    }
+  
+    document.getElementById('prev-month').addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      generateCalendar(currentMonth, currentYear);
+    });
+  
+    document.getElementById('next-month').addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      generateCalendar(currentMonth, currentYear);
+    });
+  
+    fetchICSEvents();
+  </script>
+  
+</body>
+</html>
