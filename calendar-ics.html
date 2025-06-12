@@ -3,25 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Calendar</title>
+  <title>ICS Calendar</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    .popup {
-      position: absolute;
-      background-color: #211a1d;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      padding: 1rem;
-      z-index: 1000;
-      max-width: 250px;
-      font-size: 0.9rem;
-    }
-    .popup h3 {
-      margin-top: 0;
-      font-size: 1rem;
-    }
-  </style>
 </head>
 <body>
   <header>
@@ -44,7 +27,6 @@
       </div>
 
       <div id="calendar-grid" class="calendar-grid">
-        <!-- Weekday headers (these stay in place) -->
         <div class="weekday">Sun</div>
         <div class="weekday">Mon</div>
         <div class="weekday">Tue</div>
@@ -56,6 +38,15 @@
     </section>
   </main>
 
+  <!-- Modal -->
+  <div id="event-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close-button">&times;</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Load ical.js -->
   <script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
 
   <script>
@@ -78,7 +69,6 @@
         const vevents = comp.getAllSubcomponents('vevent');
 
         const events = {};
-
         vevents.forEach(vevent => {
           const evt = new ICAL.Event(vevent);
           const startDate = evt.startDate.toJSDate();
@@ -114,18 +104,20 @@
 
       calendarHeader.textContent = `${monthNames[month]} ${year}`;
 
+      // Remove previous calendar cells (preserve weekday headers)
       calendarGrid.querySelectorAll('.calendar-cell, .empty').forEach(el => el.remove());
-      removePopup();
 
       const firstDay = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+      // Empty slots before first day
       for (let i = 0; i < firstDay; i++) {
         const cell = document.createElement('div');
         cell.classList.add('empty');
         calendarGrid.appendChild(cell);
       }
 
+      // Create day cells
       for (let day = 1; day <= daysInMonth; day++) {
         const cell = document.createElement('div');
         cell.classList.add('calendar-cell');
@@ -141,10 +133,7 @@
             eventDiv.classList.add('event');
             eventDiv.innerHTML = `<span>${event.startTime} – ${event.summary}</span>`;
             eventDiv.style.cursor = "pointer";
-            eventDiv.addEventListener("click", (e) => {
-              e.stopPropagation();
-              showEventPopup(event, e);
-            });
+            eventDiv.addEventListener("click", () => showEventModal(event));
             cell.appendChild(eventDiv);
           });
         }
@@ -153,12 +142,11 @@
       }
     }
 
-    function showEventPopup(event, clickEvent) {
-      removePopup();
+    function showEventModal(event) {
+      const modal = document.getElementById("event-modal");
+      const modalBody = document.getElementById("modal-body");
 
-      const popup = document.createElement("div");
-      popup.className = "popup";
-      popup.innerHTML = `
+      modalBody.innerHTML = `
         <h3>${event.summary}</h3>
         <p><strong>Time:</strong> ${event.startTime}</p>
         ${event.location ? `<p><strong>Location:</strong> ${event.location}</p>` : ""}
@@ -166,18 +154,8 @@
         ${event.url ? `<p><a href="${event.url}" target="_blank">More info</a></p>` : ""}
       `;
 
-      document.body.appendChild(popup);
-
-      const rect = clickEvent.target.getBoundingClientRect();
-      popup.style.left = `${rect.right + 10 + window.scrollX}px`;
-      popup.style.top = `${rect.top + window.scrollY}px`;
+      modal.style.display = "block";
     }
-
-    function removePopup() {
-      document.querySelectorAll(".popup").forEach(p => p.remove());
-    }
-
-    document.addEventListener("click", removePopup);
 
     document.getElementById('prev-month').addEventListener('click', () => {
       currentMonth--;
@@ -195,6 +173,17 @@
         currentYear++;
       }
       generateCalendar(currentMonth, currentYear);
+    });
+
+    document.querySelector(".close-button").addEventListener("click", () => {
+      document.getElementById("event-modal").style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+      const modal = document.getElementById("event-modal");
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
     });
 
     fetchICSEvents();
