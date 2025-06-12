@@ -312,5 +312,98 @@ nav ul li a:hover {
     color: #6320EE;
   }
   
+/* about page styles */
+  .about-page {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  .card {
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: 1px solid #ddd;
+  }
+  
+  .card h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .card p,
+  .card li {
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .contact-card ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .contact-card li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .contact-card a {
+    color: #0077cc;
+    text-decoration: none;
+  }
+  
+  .contact-card a:hover {
+    text-decoration: underline;
+  }
+  
 
+  .event small {
+    display: block;
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 0.25rem;
+  }
+  
+  .event a {
+    color: #0066cc;
+    text-decoration: underline;
+    font-size: 0.9em;
+  }
+  
+
+  /* Modal container */
+.modal {
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+  }
+  
+  /* Modal content */
+  .modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 1.5rem;
+    border: 1px solid #ccc;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  
+  /* Close button */
+  .close-button {
+    float: right;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
   

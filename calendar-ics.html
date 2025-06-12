@@ -3,8 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ICS Calendar</title>
+  <title>Calendar</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .popup {
+      position: absolute;
+      background-color: #211a1d;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      padding: 1rem;
+      z-index: 1000;
+      max-width: 250px;
+      font-size: 0.9rem;
+    }
+    .popup h3 {
+      margin-top: 0;
+      font-size: 1rem;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -34,12 +51,11 @@
         <div class="weekday">Wed</div>
         <div class="weekday">Thu</div>
         <div class="weekday">Fri</div>
-        <div class="weekday">Sat</div>        
+        <div class="weekday">Sat</div>
       </div>
     </section>
   </main>
 
-  <!-- Load ical.js from jsDelivr -->
   <script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
 
   <script>
@@ -48,11 +64,11 @@
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
-  
+
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
     let allEvents = {};
-  
+
     async function fetchICSEvents() {
       try {
         const response = await fetch(ICS_URL);
@@ -60,28 +76,30 @@
         const jcalData = ICAL.parse(text);
         const comp = new ICAL.Component(jcalData);
         const vevents = comp.getAllSubcomponents('vevent');
-  
+
         const events = {};
-  
+
         vevents.forEach(vevent => {
           const evt = new ICAL.Event(vevent);
           const startDate = evt.startDate.toJSDate();
           const key = startDate.toISOString().split('T')[0];
-  
+
           const timeOptions = { hour: 'numeric', minute: '2-digit' };
           const startTime = startDate.toLocaleTimeString([], timeOptions);
-  
+
           let location = evt.location || "";
           location = location.replace(", United States", "").trim();
-  
+
           if (!events[key]) events[key] = [];
-          events[key].push({ 
-            summary: evt.summary, 
-            location, 
-            startTime 
+          events[key].push({
+            summary: evt.summary,
+            location,
+            startTime,
+            description: vevent.getFirstPropertyValue('description') || "",
+            url: vevent.getFirstPropertyValue('url') || ""
           });
         });
-  
+
         allEvents = events;
         generateCalendar(currentMonth, currentYear);
       } catch (err) {
@@ -89,48 +107,78 @@
         document.getElementById('calendar-grid').innerHTML += '<p style="color:red;">Failed to load calendar events.</p>';
       }
     }
-  
+
     function generateCalendar(month, year) {
       const calendarHeader = document.getElementById('calendar-header');
       const calendarGrid = document.getElementById('calendar-grid');
-  
+
       calendarHeader.textContent = `${monthNames[month]} ${year}`;
-  
-      // Remove previous calendar cells (preserve weekday headers)
+
       calendarGrid.querySelectorAll('.calendar-cell, .empty').forEach(el => el.remove());
-  
+      removePopup();
+
       const firstDay = new Date(year, month, 1).getDay();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
-  
-      // Add empty cells before the first day
+
       for (let i = 0; i < firstDay; i++) {
         const cell = document.createElement('div');
         cell.classList.add('empty');
         calendarGrid.appendChild(cell);
       }
-  
+
       for (let day = 1; day <= daysInMonth; day++) {
         const cell = document.createElement('div');
         cell.classList.add('calendar-cell');
-  
+
         const date = new Date(year, month, day);
         const key = date.toISOString().split('T')[0];
-  
+
         cell.innerHTML = `<strong>${day}</strong>`;
-  
+
         if (allEvents[key]) {
           allEvents[key].forEach(event => {
             const eventDiv = document.createElement('div');
             eventDiv.classList.add('event');
-            eventDiv.innerHTML = `<span>${event.startTime} – ${event.summary}</span>${event.location ? `<br><em>${event.location}</em>` : ""}`;
+            eventDiv.innerHTML = `<span>${event.startTime} – ${event.summary}</span>`;
+            eventDiv.style.cursor = "pointer";
+            eventDiv.addEventListener("click", (e) => {
+              e.stopPropagation();
+              showEventPopup(event, e);
+            });
             cell.appendChild(eventDiv);
           });
         }
-  
+
         calendarGrid.appendChild(cell);
       }
     }
-  
+
+    function showEventPopup(event, clickEvent) {
+      removePopup();
+
+      const popup = document.createElement("div");
+      popup.className = "popup";
+      popup.innerHTML = `
+        <h3>${event.summary}</h3>
+        <p><strong>Time:</strong> ${event.startTime}</p>
+        ${event.location ? `<p><strong>Location:</strong> ${event.location}</p>` : ""}
+        ${event.description ? `<p><strong>Notes:</strong><br>${event.description}</p>` : ""}
+        ${event.url ? `<p><a href="${event.url}" target="_blank">More info</a></p>` : ""}
+      `;
+
+      document.body.appendChild(popup);
+
+      const rect = clickEvent.target.getBoundingClientRect();
+      popup.style.left = `${rect.right + 10 + window.scrollX}px`;
+      popup.style.top = `${rect.top + window.scrollY}px`;
+    }
+
+    function removePopup() {
+      document.querySelectorAll(".popup").forEach(p => p.remove());
+    }
+
+    document.addEventListener("click", removePopup);
+
     document.getElementById('prev-month').addEventListener('click', () => {
       currentMonth--;
       if (currentMonth < 0) {
@@ -139,7 +187,7 @@
       }
       generateCalendar(currentMonth, currentYear);
     });
-  
+
     document.getElementById('next-month').addEventListener('click', () => {
       currentMonth++;
       if (currentMonth > 11) {
@@ -148,9 +196,8 @@
       }
       generateCalendar(currentMonth, currentYear);
     });
-  
+
     fetchICSEvents();
   </script>
-  
 </body>
 </html>
