@@ -7,95 +7,134 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     .popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      position: absolute;
       background-color: #211a1d;
       border: 1px solid #ccc;
       border-radius: 0.5rem;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
       padding: 1rem;
-      z-index: 1001;
-      max-width: 90%;
-      width: 300px;
+      z-index: 1000;
+      max-width: 250px;
       font-size: 0.9rem;
-      color: white;
     }
-  
     .popup h3 {
       margin-top: 0;
       font-size: 1rem;
     }
-  
-    .popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 100vw;
-      background: rgba(0,0,0,0.4);
-      z-index: 1000;
+    .calendar-button {
+      padding: 0.25rem 0.75rem;
+      font-size: 1rem;
     }
-  
-    .popup-close {
-      position: absolute;
-      top: 0.25rem;
-      right: 0.5rem;
+    #view-toggle button {
+      padding: 0.5rem 1rem;
+      margin-right: 0.5rem;
+      font-size: 1rem;
+      border: none;
+      background-color: #ddd;
       cursor: pointer;
-      font-size: 1.25rem;
-      color: white;
+      border-radius: 0.5rem 0.5rem 0 0;
     }
-  
-    @media (max-width: 600px) {
-      .popup {
-        width: 90%;
-        font-size: 1rem;
-      }
+    #view-toggle button.active {
+      background-color: #bbb;
+      font-weight: bold;
     }
-
-    .event span {
-  display: inline-block;
-  font-size: 0.75rem;
-  color: white;
-  background: #5c3c45;
-  padding: 2px 6px;
-  border-radius: 0.3rem;
-  margin-top: 2px;
-}
-
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .weekday {
+      font-weight: bold;
+      text-align: center;
+      padding: 0.5rem;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
+    }
+    .calendar-cell {
+      min-height: 80px;
+      border: 1px solid #ccc;
+      padding: 0.25rem;
+    }
+    .event {
+      background: #eee;
+      border-radius: 4px;
+      padding: 0.2rem 0.4rem;
+      margin-top: 0.2rem;
+    }
   </style>
-  
 </head>
 <body>
   <header>
-    <h1>Calendar</h1>
+    <h1>Upcoming Shows</h1>
     <nav>
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="music.html">Music</a></li>
-        <li><a href="calendar-ics.html">Calendar</a></li>
+        <li><a href="calendar-ics.html">Upcoming Shows</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
     <section class="events">
-      <div id="calendar-controls" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-        <button id="prev-month" class="calendar-button">←</button>
-        <div id="calendar-header" style="font-size: 1.5rem; font-weight: bold;"></div>
-        <button id="next-month" class="calendar-button">→</button>
+
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <p style="margin-bottom: 0.5rem; font-size: 1.1rem;">
+                View Caton's upcoming shows in calendar or table format:
+              </p>
+              <div id="view-toggle">
+                <button id="btn-calendar" class="active" onclick="toggleView('calendar')">🗓️ Calendar View</button>
+                <button id="btn-table" onclick="toggleView('table')">📋 Table View</button>
+              </div>
+            </div>
+        </div>
+                    
+
+      <!-- Calendar View -->
+      <div id="calendar-view">
+        <div id="calendar-controls" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+          <button id="prev-month" class="calendar-button">←</button>
+          <div id="calendar-header" style="font-size: 1.5rem; font-weight: bold;"></div>
+          <button id="next-month" class="calendar-button">→</button>
+        </div>
+
+        <div id="calendar-grid" class="calendar-grid">
+          <div class="weekday">Sun</div>
+          <div class="weekday">Mon</div>
+          <div class="weekday">Tue</div>
+          <div class="weekday">Wed</div>
+          <div class="weekday">Thu</div>
+          <div class="weekday">Fri</div>
+          <div class="weekday">Sat</div>
+        </div>
       </div>
 
-      <div id="calendar-grid" class="calendar-grid">
-        <!-- Weekday headers (these stay in place) -->
-        <div class="weekday">Sun</div>
-        <div class="weekday">Mon</div>
-        <div class="weekday">Tue</div>
-        <div class="weekday">Wed</div>
-        <div class="weekday">Thu</div>
-        <div class="weekday">Fri</div>
-        <div class="weekday">Sat</div>
+      <!-- Table View -->
+      <div id="table-view" style="display: none;">
+        <table id="events-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Event</th>
+              <th>Location</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </div>
     </section>
   </main>
@@ -104,6 +143,7 @@
 
   <script>
     const ICS_URL = 'https://corsproxy.io/?https://p118-caldav.icloud.com/published/2/NTI0OTUwOTM3NTI0OTUwORo0a-wmI95-JRdLXFzjojifxeSQ6Ew_rOm_nbJdMtZombSywkn2ZyAFT9Bmv9iryydRTANGQNousV8IatZ50OM';
+
     const monthNames = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
@@ -146,6 +186,7 @@
 
         allEvents = events;
         generateCalendar(currentMonth, currentYear);
+        populateTable(events);
       } catch (err) {
         console.error('Failed to load ICS:', err);
         document.getElementById('calendar-grid').innerHTML += '<p style="color:red;">Failed to load calendar events.</p>';
@@ -183,11 +224,11 @@
           allEvents[key].forEach(event => {
             const eventDiv = document.createElement('div');
             eventDiv.classList.add('event');
-            eventDiv.innerHTML = `<span>${event.startTime}</span>`;
+            eventDiv.innerHTML = `<span>${event.startTime}</span>`; // Just time
             eventDiv.style.cursor = "pointer";
             eventDiv.addEventListener("click", (e) => {
               e.stopPropagation();
-              showEventPopup(event);
+              showEventPopup(event, e);
             });
             cell.appendChild(eventDiv);
           });
@@ -198,41 +239,39 @@
     }
 
     function showEventPopup(event) {
-    // Remove any existing popup and overlay
-    document.querySelectorAll(".popup, .popup-overlay").forEach(el => el.remove());
+      document.querySelectorAll(".popup, .popup-overlay").forEach(el => el.remove());
 
-    const overlay = document.createElement("div");
-    overlay.className = "popup-overlay";
-    overlay.addEventListener("click", () => {
+      const overlay = document.createElement("div");
+      overlay.className = "popup-overlay";
+      overlay.addEventListener("click", () => {
         overlay.remove();
         popup.remove();
-    });
+      });
 
-    const popup = document.createElement("div");
-    popup.className = "popup";
+      const popup = document.createElement("div");
+      popup.className = "popup";
 
-    const closeBtn = document.createElement("span");
-    closeBtn.className = "popup-close";
-    closeBtn.innerHTML = "&times;";
-    closeBtn.addEventListener("click", () => {
+      const closeBtn = document.createElement("span");
+      closeBtn.className = "popup-close";
+      closeBtn.innerHTML = "&times;";
+      closeBtn.addEventListener("click", () => {
         popup.remove();
         overlay.remove();
-    });
+      });
 
-    popup.appendChild(closeBtn);
+      popup.appendChild(closeBtn);
 
-    popup.innerHTML += `
+      popup.innerHTML += `
         <h3>${event.summary}</h3>
         <p><strong>Time:</strong> ${event.startTime}</p>
         ${event.location ? `<p><strong>Location:</strong> ${event.location}</p>` : ""}
         ${event.description ? `<p><strong>Notes:</strong><br>${event.description}</p>` : ""}
         ${event.url ? `<p><a href="${event.url}" target="_blank">More info</a></p>` : ""}
-    `;
+      `;
 
-    document.body.appendChild(overlay);
-    document.body.appendChild(popup);
+      document.body.appendChild(overlay);
+      document.body.appendChild(popup);
     }
-
 
     function removePopup() {
       document.querySelectorAll(".popup").forEach(p => p.remove());
@@ -257,6 +296,35 @@
       }
       generateCalendar(currentMonth, currentYear);
     });
+
+    function toggleView(view) {
+      document.getElementById('calendar-view').style.display = view === 'calendar' ? 'block' : 'none';
+      document.getElementById('table-view').style.display = view === 'table' ? 'block' : 'none';
+
+      document.getElementById('btn-calendar').classList.toggle('active', view === 'calendar');
+      document.getElementById('btn-table').classList.toggle('active', view === 'table');
+    }
+
+    function populateTable(eventsByDate) {
+      const tbody = document.querySelector("#events-table tbody");
+      tbody.innerHTML = "";
+
+      const sortedDates = Object.keys(eventsByDate).sort();
+
+      sortedDates.forEach(date => {
+        eventsByDate[date].forEach(event => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${date}</td>
+            <td>${event.startTime}</td>
+            <td>${event.summary}</td>
+            <td>${event.location || ""}</td>
+            <td>${event.description || ""}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+    }
 
     fetchICSEvents();
   </script>
