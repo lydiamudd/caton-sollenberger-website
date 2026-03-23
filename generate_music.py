@@ -33,13 +33,13 @@ def build_table_row(title, artist, apple_url, spotify_url):
 def generate_table_rows():
     """Read albums.csv and return all table rows as a string."""
     rows = []
-    with open("albums.csv", newline="", encoding="utf-8") as csvfile:
+    with open("albums.csv", newline="", encoding="utf-8-sig") as csvfile:
         reader = csv.DictReader(csvfile)
         for album in reader:
             row = build_table_row(
                 title=album["title"],
                 artist=album["artist"],
-                apple_music_url=album["apple_music_url"],
+                apple_url=album["apple_music_url"],
                 spotify_url=album["spotify_url"]
             )
             rows.append(row)
